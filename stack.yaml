@@ -1,0 +1,126 @@
+Resources:
+  ErrorBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+            ExpirationInDays: 1
+            Id: DeleteBackups
+            Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+  KinesisRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:AbortMultipartUpload
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:PutObject
+                Resource:
+                  - Fn::GetAtt:
+                      - ErrorBucket
+                      - Arn
+                  - Fn::Join:
+                      - ""
+                      - - Fn::GetAtt:
+                            - ErrorBucket
+                            - Arn
+                        - /*
+          PolicyName: HttpDelivery
+  KinesisMetricStream:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamName: OpswatchMetricStream
+      DeliveryStreamType: DirectPut
+      HttpEndpointDestinationConfiguration:
+        BufferingHints:
+          IntervalInSeconds: 60
+          SizeInMBs: 1
+        EndpointConfiguration:
+          Name: CentralMetricProcessor
+          Url:
+            Ref: OpsWatchUrl
+        RetryOptions:
+          DurationInSeconds: 100
+        RoleARN:
+          Fn::GetAtt:
+            - KinesisRole
+            - Arn
+        S3BackupMode: FailedDataOnly
+        S3Configuration:
+          BucketARN:
+            Fn::GetAtt:
+              - ErrorBucket
+              - Arn
+          BufferingHints:
+            IntervalInSeconds: 900
+            SizeInMBs: 128
+          CompressionFormat: GZIP
+          RoleARN:
+            Fn::GetAtt:
+              - KinesisRole
+              - Arn
+  CloudwatchRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: streams.metrics.cloudwatch.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - firehose:PutRecord
+                  - firehose:PutRecordBatch
+                Resource:
+                  Fn::GetAtt:
+                    - KinesisMetricStream
+                    - Arn
+          PolicyName: FirehoseDelivery
+  CloudwatchMetricStream:
+    Type: AWS::CloudWatch::MetricStream
+    Properties:
+      FirehoseArn:
+        Fn::GetAtt:
+          - KinesisMetricStream
+          - Arn
+      OutputFormat: json
+      RoleArn:
+        Fn::GetAtt:
+          - CloudwatchRole
+          - Arn
+      Name: OpswatchMetricStream
+Parameters:
+  OpsWatchUrl:
+    Type: String
