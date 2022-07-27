@@ -58,6 +58,8 @@ Resources:
       DeliveryStreamName: OpswatchMetricStream
       DeliveryStreamType: DirectPut
       HttpEndpointDestinationConfiguration:
+        RequestConfiguration:
+          ContentEncoding: GZIP
         BufferingHints:
           IntervalInSeconds: 60
           SizeInMBs: 1
