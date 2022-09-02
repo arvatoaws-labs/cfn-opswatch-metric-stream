@@ -25,33 +25,33 @@ Resources:
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Effect: Allow
-            Principal:
-              Service: firehose.amazonaws.com
-            Action: sts:AssumeRole
+        - Effect: Allow
+          Principal:
+            Service: firehose.amazonaws.com
+          Action: sts:AssumeRole
       Policies:
-        - PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:AbortMultipartUpload
-                  - s3:GetBucketLocation
-                  - s3:GetObject
-                  - s3:ListBucket
-                  - s3:ListBucketMultipartUploads
-                  - s3:PutObject
-                Resource:
-                  - Fn::GetAtt:
-                      - ErrorBucket
-                      - Arn
-                  - Fn::Join:
-                      - ""
-                      - - Fn::GetAtt:
-                            - ErrorBucket
-                            - Arn
-                        - /*
-          PolicyName: HttpDelivery
+      - PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - s3:AbortMultipartUpload
+            - s3:GetBucketLocation
+            - s3:GetObject
+            - s3:ListBucket
+            - s3:ListBucketMultipartUploads
+            - s3:PutObject
+            Resource:
+            - Fn::GetAtt:
+              - ErrorBucket
+              - Arn
+            - Fn::Join:
+              - ""
+              - - Fn::GetAtt:
+                  - ErrorBucket
+                  - Arn
+                - /*
+        PolicyName: HttpDelivery
   KinesisMetricStream:
     Type: AWS::KinesisFirehose::DeliveryStream
     Properties:
@@ -66,7 +66,10 @@ Resources:
         EndpointConfiguration:
           Name: CentralMetricProcessor
           Url:
-            Ref: OpsWatchUrl
+            Fn::Join:
+            - ""
+            - - Ref: OpsWatchUrl
+              - "/metrics"
         RetryOptions:
           DurationInSeconds: 100
         RoleARN:
@@ -77,16 +80,16 @@ Resources:
         S3Configuration:
           BucketARN:
             Fn::GetAtt:
-              - ErrorBucket
-              - Arn
+            - ErrorBucket
+            - Arn
           BufferingHints:
             IntervalInSeconds: 900
             SizeInMBs: 128
           CompressionFormat: GZIP
           RoleARN:
             Fn::GetAtt:
-              - KinesisRole
-              - Arn
+            - KinesisRole
+            - Arn
   CloudwatchRole:
     Type: AWS::IAM::Role
     Properties:
@@ -115,14 +118,63 @@ Resources:
     Properties:
       FirehoseArn:
         Fn::GetAtt:
-          - KinesisMetricStream
-          - Arn
+        - KinesisMetricStream
+        - Arn
       OutputFormat: json
       RoleArn:
         Fn::GetAtt:
-          - CloudwatchRole
-          - Arn
+        - CloudwatchRole
+        - Arn
       Name: OpswatchMetricStream
+  EventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: opswatch
+  EventRuleTrustedAdvisor:
+    Type: AWS::Events::Rule
+    Properties:
+      EventBusName:
+        Ref: EventBus
+      EventPattern:
+        source:
+        - aws.trustedadvisor
+        detail-type:
+        - Trusted Advisor Check Item Refresh Notification
+      Targets:
+      - Arn:
+          Fn::GetAtt:
+          - TrustedAdvisorTopic
+          - TopicArn
+        Id: trusted_advisor_sns
+  TrustedAdvisorTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: trusted_advisor
+      Subscription:
+      - Endpoint:
+          Fn::Join:
+            - ""
+            - - Ref: OpsWatchUrl
+              - "/trusted_advisor"
+        Protocol: https
+  TrustedAdvisorTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics:
+      - Ref: TrustedAdvisorTopic
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Action:
+          - SNS:Publish
+          Resource:
+          - Fn::GetAtt:
+            - TrustedAdvisorTopic
+            - TopicArn
+          Principal:
+            Service:
+            - events.amazonaws.com
 Parameters:
   OpsWatchUrl:
     Type: String
