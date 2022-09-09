@@ -126,15 +126,10 @@ Resources:
         - CloudwatchRole
         - Arn
       Name: OpswatchMetricStream
-  EventBus:
-    Type: AWS::Events::EventBus
-    Properties:
-      Name: opswatch
   EventRuleTrustedAdvisor:
     Type: AWS::Events::Rule
     Properties:
-      EventBusName:
-        Ref: EventBus
+      EventBusName: default
       EventPattern:
         source:
         - aws.trustedadvisor
