@@ -5,15 +5,15 @@ Resources:
       AccessControl: Private
       BucketEncryption:
         ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: AES256
       LifecycleConfiguration:
         Rules:
-          - AbortIncompleteMultipartUpload:
-              DaysAfterInitiation: 1
-            ExpirationInDays: 1
-            Id: DeleteBackups
-            Status: Enabled
+        - AbortIncompleteMultipartUpload:
+            DaysAfterInitiation: 1
+          ExpirationInDays: 1
+          Id: DeleteBackups
+          Status: Enabled
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -74,8 +74,8 @@ Resources:
           DurationInSeconds: 100
         RoleARN:
           Fn::GetAtt:
-            - KinesisRole
-            - Arn
+          - KinesisRole
+          - Arn
         S3BackupMode: FailedDataOnly
         S3Configuration:
           BucketARN:
@@ -96,23 +96,23 @@ Resources:
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Effect: Allow
-            Principal:
-              Service: streams.metrics.cloudwatch.amazonaws.com
-            Action: sts:AssumeRole
+        - Effect: Allow
+          Principal:
+            Service: streams.metrics.cloudwatch.amazonaws.com
+          Action: sts:AssumeRole
       Policies:
-        - PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - firehose:PutRecord
-                  - firehose:PutRecordBatch
-                Resource:
-                  Fn::GetAtt:
-                    - KinesisMetricStream
-                    - Arn
-          PolicyName: FirehoseDelivery
+      - PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - firehose:PutRecord
+            - firehose:PutRecordBatch
+            Resource:
+              Fn::GetAtt:
+              - KinesisMetricStream
+              - Arn
+        PolicyName: FirehoseDelivery
   CloudwatchMetricStream:
     Type: AWS::CloudWatch::MetricStream
     Properties:
@@ -151,9 +151,9 @@ Resources:
       Subscription:
       - Endpoint:
           Fn::Join:
-            - ""
-            - - Ref: OpsWatchUrl
-              - "/trusted_advisor"
+          - ""
+          - - Ref: OpsWatchUrl
+            - "/trusted_advisor"
         Protocol: https
   TrustedAdvisorTopicPolicy:
     Type: AWS::SNS::TopicPolicy
