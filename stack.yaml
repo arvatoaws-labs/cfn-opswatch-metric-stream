@@ -161,6 +161,7 @@ Resources:
           - RequestCount
           - TargetResponseTime
           - UnHealthyHostCount
+          - ActiveConnectionCount
         - Namespace: AWS/AutoScaling
           MetricNames:
           - GroupDesiredCapacity
@@ -269,6 +270,7 @@ Resources:
           MetricNames:
           - HealthyHostCount
           - UnHealthyHostCount
+          - ActiveFlowCount
         - Namespace: AWS/PrivateLinkEndpoints
           MetricNames:
           - PacketsDropped
