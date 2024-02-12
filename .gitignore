@@ -1,4 +1,4 @@
 .DS_Store
 .vscode
 
-stack_configuration.json
+stack_configuration*.json

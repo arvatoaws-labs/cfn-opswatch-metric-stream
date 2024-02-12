@@ -116,9 +116,11 @@ Resources:
   CloudwatchMetricStream:
     Type: AWS::CloudWatch::MetricStream
     Properties:
-      ExcludeFilters:
-      - Namespace: Usage
-      - Namespace: TrustedAdvisor
+      ExcludeFilters: !If
+      - LimitedMetricsSet
+      - Ref: AWS::NoValue
+      - - Namespace: Usage
+        - Namespace: TrustedAdvisor
       FirehoseArn:
         Fn::GetAtt:
         - KinesisMetricStream
@@ -129,6 +131,210 @@ Resources:
         - CloudwatchRole
         - Arn
       Name: OpswatchMetricStream
+      IncludeFilters: !If
+      - LimitedMetricsSet
+      - - Namespace: AWS/AmazonMQ
+          MetricNames:
+          - AmqpMaximumConnections
+          - BurstBalance
+          - CpuUtilization
+          - CurrentConnectionsCount
+          - HeapUsage
+          - JournalFilesForFastRecovery
+          - JournalFilesForFullRecovery
+          - MqttMaximumConnections
+          - OpenwireMaximumConnections
+          - QueueSize
+          - StompMaximumConnections
+          - StoragePercentUsage
+          - WsMaximumConnections
+        - Namespace: AWS/ApiGateway
+          MetricNames:
+          - 5XXError
+          - Count # TODO: is this right?
+          - Latency
+        - Namespace: AWS/ApplicationELB
+          MetricNames:
+          - HTTPCodeTarget4XXCount
+          - HTTPCodeTarget5XXCount
+          - HealthyHostCount
+          - RequestCount
+          - TargetResponseTime
+          - UnHealthyHostCount
+        - Namespace: AWS/AutoScaling
+          MetricNames:
+          - GroupDesiredCapacity
+          - GroupInServiceInstances
+          - GroupMaxSize
+          - GroupTotalInstances
+        - Namespace: AWS/Backup
+          MetricNames:
+          - NumberOfBackupJobsFailed
+        - Namespace: CWAgent
+          MetricNames:
+          - diskinodesfree
+          - diskusedpercent
+        - Namespace: AWS/CertificateManager
+          MetricNames:
+          - DaysToExpiry
+        - Namespace: AWS/CloudFront
+          MetricNames:
+          - 4xxErrorRate
+          - 5xxErrorRate
+        - Namespace: AWS/CloudWatch
+          MetricNames:
+          - MetricUpdate
+        - Namespace: AWS/CloudWatch/MetricStreams
+          MetricNames:
+          - MetricUpdate
+        - Namespace: AWS/CodeBuild
+          MetricNames:
+          - FailedBuilds
+        - Namespace: AWS/DX
+          MetricNames:
+          - ConnectionState
+        - Namespace: AWS/DynamoDB
+          MetricNames:
+          - SuccessfulRequestLatency
+          - ThrottledRequests
+        - Namespace: AWS/EBS
+          MetricNames:
+          - BurstBalance
+        - Namespace: AWS/EC2
+          MetricNames:
+          - CPUCreditBalance
+          - CPUSurplusCreditsCharged
+          - CPUUtilization
+          - StatusCheckFailedInstance
+          - StatusCheckFailedSystem
+        - Namespace: AWS/ECS
+          MetricNames:
+          - CPUUtilization
+          - MemoryUtilization
+        - Namespace: ECS/ContainerInsights
+          MetricNames:
+          - DesiredTaskCount
+          - RunningTaskCount
+        - Namespace: AWS/EFS
+          MetricNames:
+          - BurstCreditBalance
+          - PercentIOLimit
+        - Namespace: AWS/ES
+          MetricNames:
+          - 3xx
+          - 4xx
+          - 5xx
+          - AutomatedSnapshotFailure
+          - CPUUtilization
+          - ClusterStatusred
+          - ClusterStatusyellow
+          - FreeStorageSpace
+          - MasterReachableFromNode
+          - Shardsactive
+          - Shardsrelocating
+          - Shardsunassigned
+        - Namespace: AWS/ElastiCache
+          MetricNames:
+          - AuthenticationFailures
+          - CPUCreditBalance
+          - CPUUtilization
+          - CacheHitRate
+          - DatabaseCapacityUsagePercentage
+          - DatabaseMemoryUsageCountedForEvictPercentage
+          - NetworkBandwidthInAllowanceExceeded
+          - NetworkBandwidthOutAllowanceExceeded
+        - Namespace: AWS/Kafka
+          MetricNames:
+          - ActiveControllerCount
+          - GlobalTopicCount
+          - NetworkRxErrors
+          - NetworkTxErrors
+          - OfflinePartitionsCount
+          - UnderMinIsrPartitionCount
+          - UnderReplicatedPartitions
+          - ZooKeeperSessionState
+        - Namespace: AWS/Lambda
+          MetricNames:
+          - ConcurrentExecutions
+          - Duration
+          - Errors
+          - Invocations
+          - Throttles
+          - UnreservedConcurrentExecutions
+        - Namespace: AWS/NATGateway
+          MetricNames:
+          - ErrorPortAllocation
+          - PacketsDropCount
+        - Namespace: AWS/NetworkELB
+          MetricNames:
+          - HealthyHostCount
+          - UnHealthyHostCount
+        - Namespace: AWS/PrivateLinkEndpoints
+          MetricNames:
+          - PacketsDropped
+          - RstPacketsReceived
+        - Namespace: AWS/RDS
+          MetricNames:
+          - ACUUtilization
+          - AbortedClients
+          - AuroraBinlogReplicaLag
+          - AuroraReplicaLag
+          - BurstBalance
+          - CPUCreditBalance
+          - CPUUtilization
+          - CommitLatency
+          - DDLLatency
+          - DatabaseConnections
+          - Deadlocks
+          - DeleteLatency
+          - EBSByteBalance
+          - EBSIOBalance
+          - FreeLocalStorage
+          - LoginFailures
+          - ReadLatency
+          - ServerlessDatabaseCapacity
+          - UpdateLatency
+          - WriteLatency
+        - Namespace: AWS/Route53 # I think it is better to get all metrics here
+          # HealthCheckPercentageHealthy
+        - Namespace: AWS/SES
+          MetricNames:
+          - ReputationBounceRate
+          - ReputationComplaintRate
+        - Namespace: AWS/SNS
+          MetricNames:
+          - NumberOfNotificationsFailed
+        - Namespace: AWS/SQS
+          MetricNames:
+          - ApproximateAgeOfOldestMessage
+          - ApproximateNumberOfMessagesVisible
+          - NumberOfEmptyReceives
+        - Namespace: AWS/TransitGateway
+          MetricNames:
+          - BytesDropCountBlackhole
+          - BytesDropCountNoRoute
+          - PacketDropCountBlackhole
+          - PacketDropCountNoRoute
+        - Namespace: AWS/WAF
+          MetricNames:
+          - AllowedRequests
+          - BlockedRequests
+        - Namespace: AWS/WAFV2
+          MetricNames:
+          - AllowedRequests
+          - BlockedRequests
+          - CountedRequests
+      - Ref: AWS::NoValue
 Parameters:
   OpsWatchUrl:
     Type: String
+  UseLimitedMetricSetOnly:
+    Type: String
+    AllowedValues:
+    - "true"
+    - "false"
+    Default: "false"
+Conditions:
+  LimitedMetricsSet: !Equals
+  - !Ref UseLimitedMetricSetOnly
+  - "true"
