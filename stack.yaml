@@ -151,7 +151,7 @@ Resources:
         - Namespace: AWS/ApiGateway
           MetricNames:
           - 5XXError
-          - Count # TODO: is this right?
+          - Count
           - Latency
         - Namespace: AWS/ApplicationELB
           MetricNames:
@@ -183,9 +183,6 @@ Resources:
           - 4xxErrorRate
           - 5xxErrorRate
           - BytesDownloaded
-        - Namespace: AWS/CloudWatch
-          MetricNames:
-          - MetricUpdate
         - Namespace: AWS/CloudWatch/MetricStreams
           MetricNames:
           - MetricUpdate
@@ -217,6 +214,15 @@ Resources:
           MetricNames:
           - DesiredTaskCount
           - RunningTaskCount
+          - DeploymentCount
+          - PendingTaskCount
+          - TaskSetCount
+          - EphemeralStorageUtilized
+          - EphemeralStorageReserved
+          - CpuUtilized
+          - MemoryUtilized
+          - CpuReserved
+          - MemoryReserved
         - Namespace: AWS/EFS
           MetricNames:
           - BurstCreditBalance
