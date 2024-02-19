@@ -299,6 +299,7 @@ Resources:
           - EBSByteBalance
           - EBSIOBalance
           - FreeLocalStorage
+          - FreeStorageSpace
           - LoginFailures
           - ReadLatency
           - ServerlessDatabaseCapacity
