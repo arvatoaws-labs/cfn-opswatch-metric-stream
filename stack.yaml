@@ -290,6 +290,8 @@ Resources:
           - AuroraReplicaLag
           - BurstBalance
           - CPUCreditBalance
+          - CPUSurplusCreditsCharged
+          - CPUSurplusCreditBalance
           - CPUUtilization
           - CommitLatency
           - DDLLatency
