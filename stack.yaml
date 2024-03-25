@@ -19,6 +19,9 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
+      Tags:
+      - Key: asy_monitoring_plan
+        Value: default
   KinesisRole:
     Type: AWS::IAM::Role
     Properties:
@@ -52,6 +55,9 @@ Resources:
                   - Arn
                 - /*
         PolicyName: HttpDelivery
+      Tags:
+      - Key: asy_monitoring_plan
+        Value: default
   KinesisMetricStream:
     Type: AWS::KinesisFirehose::DeliveryStream
     Properties:
@@ -90,6 +96,9 @@ Resources:
             Fn::GetAtt:
             - KinesisRole
             - Arn
+      Tags:
+      - Key: asy_monitoring_plan
+        Value: default
   CloudwatchRole:
     Type: AWS::IAM::Role
     Properties:
@@ -113,6 +122,9 @@ Resources:
               - KinesisMetricStream
               - Arn
         PolicyName: FirehoseDelivery
+      Tags:
+      - Key: asy_monitoring_plan
+        Value: default
   CloudwatchMetricStream:
     Type: AWS::CloudWatch::MetricStream
     Properties:
@@ -131,6 +143,9 @@ Resources:
         - CloudwatchRole
         - Arn
       Name: OpswatchMetricStream
+      Tags:
+      - Key: asy_monitoring_plan
+        Value: default
       IncludeFilters: !If
       - LimitedMetricsSet
       - - Namespace: AWS/AmazonMQ
