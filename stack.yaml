@@ -261,6 +261,7 @@ Resources:
           - AuthenticationFailures
           - CPUCreditBalance
           - CPUUtilization
+          - EngineCPUUtilization
           - CacheHitRate
           - DatabaseCapacityUsagePercentage
           - DatabaseMemoryUsageCountedForEvictPercentage
