@@ -197,7 +197,8 @@ Resources:
           MetricNames:
           - 4xxErrorRate
           - 5xxErrorRate
-          - BytesDownloaded
+          - BytesDownloade
+          - Requests
         - Namespace: AWS/CloudWatch/MetricStreams
           MetricNames:
           - MetricUpdate
