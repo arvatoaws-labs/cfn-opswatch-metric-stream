@@ -326,6 +326,7 @@ Resources:
           - WriteLatency
         - Namespace: AWS/Route53 # I think it is better to get all metrics here
           # HealthCheckPercentageHealthy
+        - Namespace: AWS/TrustedAdvisor
         - Namespace: AWS/SES
           MetricNames:
           - ReputationBounceRate
