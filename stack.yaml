@@ -128,11 +128,11 @@ Resources:
   CloudwatchMetricStream:
     Type: AWS::CloudWatch::MetricStream
     Properties:
-      ExcludeFilters: !If
-      - LimitedMetricsSet
-      - Ref: AWS::NoValue
-      - - Namespace: Usage
-        - Namespace: TrustedAdvisor
+      # ExcludeFilters: !If
+      # - LimitedMetricsSet
+      # - Ref: AWS::NoValue
+      # - - Namespace: Usage
+      #   - Namespace: TrustedAdvisor
       FirehoseArn:
         Fn::GetAtt:
         - KinesisMetricStream
