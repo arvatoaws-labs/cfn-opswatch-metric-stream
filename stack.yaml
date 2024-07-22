@@ -161,7 +161,7 @@ Resources:
           - OpenwireMaximumConnections
           - QueueSize
           - StompMaximumConnections
-          - StoragePercentUsage
+          - StorePercentUsage
           - WsMaximumConnections
         - Namespace: AWS/ApiGateway
           MetricNames:
