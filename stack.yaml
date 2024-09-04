@@ -250,13 +250,13 @@ Resources:
           - 5xx
           - AutomatedSnapshotFailure
           - CPUUtilization
-          - ClusterStatusred
-          - ClusterStatusyellow
+          - ClusterStatus.red
+          - ClusterStatus.yellow
           - FreeStorageSpace
           - MasterReachableFromNode
-          - Shardsactive
-          - Shardsrelocating
-          - Shardsunassigned
+          - Shards.active
+          - Shards.relocating
+          - Shards.unassigned
         - Namespace: AWS/ElastiCache
           MetricNames:
           - AuthenticationFailures
