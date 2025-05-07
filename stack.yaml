@@ -22,6 +22,8 @@ Resources:
       Tags:
       - Key: asy_monitoring_plan
         Value: default
+      - Key: asy_backup_plan
+        Value: none
   KinesisRole:
     Type: AWS::IAM::Role
     Properties:
