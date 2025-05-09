@@ -260,6 +260,7 @@ Resources:
           - Shards.active
           - Shards.relocating
           - Shards.unassigned
+          - ClusterIndexWritesBlocked
         - Namespace: AWS/ElastiCache
           MetricNames:
           - AuthenticationFailures
