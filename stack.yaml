@@ -261,6 +261,7 @@ Resources:
           - Shards.relocating
           - Shards.unassigned
           - ClusterIndexWritesBlocked
+          - OpenSearchDashboardsHealthyNodes
         - Namespace: AWS/ElastiCache
           MetricNames:
           - AuthenticationFailures
