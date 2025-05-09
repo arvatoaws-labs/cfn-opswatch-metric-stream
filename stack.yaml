@@ -217,6 +217,8 @@ Resources:
         - Namespace: AWS/EBS
           MetricNames:
           - BurstBalance
+          - VolumeIOPSExceededCheck
+          - VolumeThroughputExceededCheck
         - Namespace: AWS/EC2
           MetricNames:
           - CPUCreditBalance
