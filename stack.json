@@ -1,0 +1,531 @@
+{
+    "Resources": {
+        "ErrorBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "AccessControl": "Private",
+                "BucketEncryption": {
+                    "ServerSideEncryptionConfiguration": [
+                        {
+                            "ServerSideEncryptionByDefault": {
+                                "SSEAlgorithm": "AES256"
+                            }
+                        }
+                    ]
+                },
+                "LifecycleConfiguration": {
+                    "Rules": [
+                        {
+                            "AbortIncompleteMultipartUpload": {
+                                "DaysAfterInitiation": 1
+                            },
+                            "ExpirationInDays": 1,
+                            "Id": "DeleteBackups",
+                            "Status": "Enabled"
+                        }
+                    ]
+                },
+                "PublicAccessBlockConfiguration": {
+                    "BlockPublicAcls": true,
+                    "BlockPublicPolicy": true,
+                    "IgnorePublicAcls": true,
+                    "RestrictPublicBuckets": true
+                },
+                "Tags": [
+                    {
+                        "Key": "asy_monitoring_plan",
+                        "Value": "default"
+                    }
+                ]
+            }
+        },
+        "KinesisRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "firehose.amazonaws.com"
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "s3:AbortMultipartUpload",
+                                        "s3:GetBucketLocation",
+                                        "s3:GetObject",
+                                        "s3:ListBucket",
+                                        "s3:ListBucketMultipartUploads",
+                                        "s3:PutObject"
+                                    ],
+                                    "Resource": [
+                                        {
+                                            "Fn::GetAtt": [
+                                                "ErrorBucket",
+                                                "Arn"
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    {
+                                                        "Fn::GetAtt": [
+                                                            "ErrorBucket",
+                                                            "Arn"
+                                                        ]
+                                                    },
+                                                    "/*"
+                                                ]
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "PolicyName": "HttpDelivery"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "asy_monitoring_plan",
+                        "Value": "default"
+                    }
+                ]
+            }
+        },
+        "KinesisMetricStream": {
+            "Type": "AWS::KinesisFirehose::DeliveryStream",
+            "Properties": {
+                "DeliveryStreamName": "OpswatchMetricStream",
+                "DeliveryStreamType": "DirectPut",
+                "HttpEndpointDestinationConfiguration": {
+                    "RequestConfiguration": {
+                        "ContentEncoding": "GZIP"
+                    },
+                    "BufferingHints": {
+                        "IntervalInSeconds": 60,
+                        "SizeInMBs": 1
+                    },
+                    "EndpointConfiguration": {
+                        "Name": "CentralMetricProcessor",
+                        "Url": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    {
+                                        "Ref": "OpsWatchUrl"
+                                    },
+                                    "/metrics"
+                                ]
+                            ]
+                        }
+                    },
+                    "RetryOptions": {
+                        "DurationInSeconds": 100
+                    },
+                    "RoleARN": {
+                        "Fn::GetAtt": [
+                            "KinesisRole",
+                            "Arn"
+                        ]
+                    },
+                    "S3BackupMode": "FailedDataOnly",
+                    "S3Configuration": {
+                        "BucketARN": {
+                            "Fn::GetAtt": [
+                                "ErrorBucket",
+                                "Arn"
+                            ]
+                        },
+                        "BufferingHints": {
+                            "IntervalInSeconds": 900,
+                            "SizeInMBs": 128
+                        },
+                        "CompressionFormat": "GZIP",
+                        "RoleARN": {
+                            "Fn::GetAtt": [
+                                "KinesisRole",
+                                "Arn"
+                            ]
+                        }
+                    }
+                },
+                "Tags": [
+                    {
+                        "Key": "asy_monitoring_plan",
+                        "Value": "default"
+                    }
+                ]
+            }
+        },
+        "CloudwatchRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "streams.metrics.cloudwatch.amazonaws.com"
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "firehose:PutRecord",
+                                        "firehose:PutRecordBatch"
+                                    ],
+                                    "Resource": {
+                                        "Fn::GetAtt": [
+                                            "KinesisMetricStream",
+                                            "Arn"
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        "PolicyName": "FirehoseDelivery"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "asy_monitoring_plan",
+                        "Value": "default"
+                    }
+                ]
+            }
+        },
+        "CloudwatchMetricStream": {
+            "Type": "AWS::CloudWatch::MetricStream",
+            "Properties": {
+                "ExcludeFilters": {
+                    "Fn::If": [
+                        "LimitedMetricsSet",
+                        {
+                            "Ref": "AWS::NoValue"
+                        },
+                        [
+                            {
+                                "Namespace": "Usage"
+                            },
+                            {
+                                "Namespace": "TrustedAdvisor"
+                            }
+                        ]
+                    ]
+                },
+                "FirehoseArn": {
+                    "Fn::GetAtt": [
+                        "KinesisMetricStream",
+                        "Arn"
+                    ]
+                },
+                "OutputFormat": "json",
+                "RoleArn": {
+                    "Fn::GetAtt": [
+                        "CloudwatchRole",
+                        "Arn"
+                    ]
+                },
+                "Name": "OpswatchMetricStream",
+                "Tags": [
+                    {
+                        "Key": "asy_monitoring_plan",
+                        "Value": "default"
+                    }
+                ],
+                "IncludeFilters": {
+                    "Fn::If": [
+                        "LimitedMetricsSet",
+                        [
+                            {
+                                "Namespace": "AWS/AmazonMQ",
+                                "MetricNames": [
+                                    "AmqpMaximumConnections",
+                                    "BurstBalance",
+                                    "CpuUtilization",
+                                    "CurrentConnectionsCount",
+                                    "HeapUsage",
+                                    "JournalFilesForFastRecovery",
+                                    "JournalFilesForFullRecovery",
+                                    "MqttMaximumConnections",
+                                    "OpenwireMaximumConnections",
+                                    "QueueSize",
+                                    "StompMaximumConnections",
+                                    "StoragePercentUsage",
+                                    "WsMaximumConnections"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/ApiGateway",
+                                "MetricNames": [
+                                    "5XXError",
+                                    "Count",
+                                    "Latency"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/AutoScaling",
+                                "MetricNames": [
+                                    "GroupDesiredCapacity",
+                                    "GroupInServiceInstances",
+                                    "GroupMaxSize",
+                                    "GroupTotalInstances"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/Backup",
+                                "MetricNames": [
+                                    "NumberOfBackupJobsFailed"
+                                ]
+                            },
+                            {
+                                "Namespace": "CWAgent",
+                                "MetricNames": [
+                                    "diskinodesfree",
+                                    "diskusedpercent"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/CertificateManager",
+                                "MetricNames": [
+                                    "DaysToExpiry"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/CloudWatch/MetricStreams",
+                                "MetricNames": [
+                                    "MetricUpdate"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/CodeBuild",
+                                "MetricNames": [
+                                    "FailedBuilds"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/DX",
+                                "MetricNames": [
+                                    "ConnectionState"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/DynamoDB",
+                                "MetricNames": [
+                                    "SuccessfulRequestLatency",
+                                    "ThrottledRequests"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/EBS",
+                                "MetricNames": [
+                                    "BurstBalance"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/EC2",
+                                "MetricNames": [
+                                    "CPUCreditBalance",
+                                    "CPUSurplusCreditsCharged",
+                                    "CPUUtilization",
+                                    "StatusCheckFailedInstance",
+                                    "StatusCheckFailedSystem"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/ECS",
+                                "MetricNames": [
+                                    "CPUUtilization",
+                                    "MemoryUtilization"
+                                ]
+                            },
+                            {
+                                "Namespace": "ECS/ContainerInsights",
+                                "MetricNames": [
+                                    "DesiredTaskCount",
+                                    "RunningTaskCount",
+                                    "DeploymentCount",
+                                    "PendingTaskCount",
+                                    "TaskSetCount",
+                                    "EphemeralStorageUtilized",
+                                    "EphemeralStorageReserved",
+                                    "CpuUtilized",
+                                    "MemoryUtilized",
+                                    "CpuReserved",
+                                    "MemoryReserved"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/EFS",
+                                "MetricNames": [
+                                    "BurstCreditBalance",
+                                    "PercentIOLimit"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/ES",
+                                "MetricNames": [
+                                    "2xx",
+                                    "3xx",
+                                    "4xx",
+                                    "5xx",
+                                    "AutomatedSnapshotFailure",
+                                    "CPUUtilization",
+                                    "ClusterStatusred",
+                                    "ClusterStatusyellow",
+                                    "FreeStorageSpace",
+                                    "MasterReachableFromNode",
+                                    "Shardsactive",
+                                    "Shardsrelocating",
+                                    "Shardsunassigned"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/Kafka",
+                                "MetricNames": [
+                                    "ActiveControllerCount",
+                                    "GlobalTopicCount",
+                                    "NetworkRxErrors",
+                                    "NetworkTxErrors",
+                                    "OfflinePartitionsCount",
+                                    "UnderMinIsrPartitionCount",
+                                    "UnderReplicatedPartitions",
+                                    "ZooKeeperSessionState"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/Lambda",
+                                "MetricNames": [
+                                    "ConcurrentExecutions",
+                                    "Duration",
+                                    "Errors",
+                                    "Invocations",
+                                    "Throttles",
+                                    "UnreservedConcurrentExecutions"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/NATGateway",
+                                "MetricNames": [
+                                    "ErrorPortAllocation",
+                                    "PacketsDropCount"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/NetworkELB",
+                                "MetricNames": [
+                                    "HealthyHostCount",
+                                    "UnHealthyHostCount",
+                                    "ActiveFlowCount"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/PrivateLinkEndpoints",
+                                "MetricNames": [
+                                    "PacketsDropped",
+                                    "RstPacketsReceived"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/Route53"
+                            },
+                            {
+                                "Namespace": "AWS/SES",
+                                "MetricNames": [
+                                    "ReputationBounceRate",
+                                    "ReputationComplaintRate"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/SNS",
+                                "MetricNames": [
+                                    "NumberOfNotificationsFailed"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/SQS",
+                                "MetricNames": [
+                                    "ApproximateAgeOfOldestMessage",
+                                    "ApproximateNumberOfMessagesVisible",
+                                    "NumberOfEmptyReceives"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/TransitGateway",
+                                "MetricNames": [
+                                    "BytesDropCountBlackhole",
+                                    "BytesDropCountNoRoute",
+                                    "PacketDropCountBlackhole",
+                                    "PacketDropCountNoRoute"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/WAF",
+                                "MetricNames": [
+                                    "AllowedRequests",
+                                    "BlockedRequests"
+                                ]
+                            },
+                            {
+                                "Namespace": "AWS/WAFV2",
+                                "MetricNames": [
+                                    "AllowedRequests",
+                                    "BlockedRequests",
+                                    "CountedRequests"
+                                ]
+                            }
+                        ],
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "Parameters": {
+        "OpsWatchUrl": {
+            "Type": "String"
+        },
+        "UseLimitedMetricSetOnly": {
+            "Type": "String",
+            "AllowedValues": [
+                "true",
+                "false"
+            ],
+            "Default": "false"
+        }
+    },
+    "Conditions": {
+        "LimitedMetricsSet": {
+            "Fn::Equals": [
+                {
+                    "Ref": "UseLimitedMetricSetOnly"
+                },
+                "true"
+            ]
+        }
+    }
+}
