@@ -449,7 +449,11 @@
                                 ]
                             },
                             {
-                                "Namespace": "AWS/Route53"
+                                "Namespace": "AWS/Route53",
+                                "MetricNames": [
+                                    "HealthCheckStatus",
+                                    "HealthCheckPercentageHealthy"
+                                ]
                             },
                             {
                                 "Namespace": "AWS/SES",
@@ -479,21 +483,6 @@
                                     "BytesDropCountNoRoute",
                                     "PacketDropCountBlackhole",
                                     "PacketDropCountNoRoute"
-                                ]
-                            },
-                            {
-                                "Namespace": "AWS/WAF",
-                                "MetricNames": [
-                                    "AllowedRequests",
-                                    "BlockedRequests"
-                                ]
-                            },
-                            {
-                                "Namespace": "AWS/WAFV2",
-                                "MetricNames": [
-                                    "AllowedRequests",
-                                    "BlockedRequests",
-                                    "CountedRequests"
                                 ]
                             }
                         ],
