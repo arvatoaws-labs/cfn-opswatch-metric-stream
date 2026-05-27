@@ -24,6 +24,18 @@ Resources:
         Value: default
       - Key: asy_backup_plan
         Value: none
+      - Key: Product ID
+        Value: prod-gis66v5zxadfk
+      - Key: Status
+        Value: Public
+      - Key: Delivery method
+        Value: Professional Services
+      - Key: Product code
+        Value: 8d3dhvaytz2l63mydmfgn9wkf
+      - Key: Last modified
+        Value: 6. Nov. 2024
+      - Key: ARN
+        Value: arn:aws:aws-marketplace:us-east-1:773355297247:AWSMarketplace/ProfessionalServicesProduct/prod-gis66v5zxadfk
   KinesisRole:
     Type: AWS::IAM::Role
     Properties:
@@ -60,6 +72,18 @@ Resources:
       Tags:
       - Key: asy_monitoring_plan
         Value: default
+      - Key: Product ID
+        Value: prod-gis66v5zxadfk
+      - Key: Status
+        Value: Public
+      - Key: Delivery method
+        Value: Professional Services
+      - Key: Product code
+        Value: 8d3dhvaytz2l63mydmfgn9wkf
+      - Key: Last modified
+        Value: 6. Nov. 2024
+      - Key: ARN
+        Value: arn:aws:aws-marketplace:us-east-1:773355297247:AWSMarketplace/ProfessionalServicesProduct/prod-gis66v5zxadfk
   KinesisMetricStream:
     Type: AWS::KinesisFirehose::DeliveryStream
     Properties:
@@ -101,6 +125,18 @@ Resources:
       Tags:
       - Key: asy_monitoring_plan
         Value: default
+      - Key: Product ID
+        Value: prod-gis66v5zxadfk
+      - Key: Status
+        Value: Public
+      - Key: Delivery method
+        Value: Professional Services
+      - Key: Product code
+        Value: 8d3dhvaytz2l63mydmfgn9wkf
+      - Key: Last modified
+        Value: 6. Nov. 2024
+      - Key: ARN
+        Value: arn:aws:aws-marketplace:us-east-1:773355297247:AWSMarketplace/ProfessionalServicesProduct/prod-gis66v5zxadfk
   CloudwatchRole:
     Type: AWS::IAM::Role
     Properties:
@@ -127,6 +163,18 @@ Resources:
       Tags:
       - Key: asy_monitoring_plan
         Value: default
+      - Key: Product ID
+        Value: prod-gis66v5zxadfk
+      - Key: Status
+        Value: Public
+      - Key: Delivery method
+        Value: Professional Services
+      - Key: Product code
+        Value: 8d3dhvaytz2l63mydmfgn9wkf
+      - Key: Last modified
+        Value: 6. Nov. 2024
+      - Key: ARN
+        Value: arn:aws:aws-marketplace:us-east-1:773355297247:AWSMarketplace/ProfessionalServicesProduct/prod-gis66v5zxadfk
   CloudwatchMetricStream:
     Type: AWS::CloudWatch::MetricStream
     Properties:
@@ -148,6 +196,18 @@ Resources:
       Tags:
       - Key: asy_monitoring_plan
         Value: default
+      - Key: Product ID
+        Value: prod-gis66v5zxadfk
+      - Key: Status
+        Value: Public
+      - Key: Delivery method
+        Value: Professional Services
+      - Key: Product code
+        Value: 8d3dhvaytz2l63mydmfgn9wkf
+      - Key: Last modified
+        Value: 6. Nov. 2024
+      - Key: ARN
+        Value: arn:aws:aws-marketplace:us-east-1:773355297247:AWSMarketplace/ProfessionalServicesProduct/prod-gis66v5zxadfk
       IncludeFilters: !If
       - LimitedMetricsSet
       - - Namespace: AWS/AmazonMQ
