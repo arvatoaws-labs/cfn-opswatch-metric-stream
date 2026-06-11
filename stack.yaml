@@ -373,6 +373,7 @@ Resources:
           - AllowedRequests
           - BlockedRequests
           - CountedRequests
+        - Namespace: Connect/Custom
       - Ref: AWS::NoValue
 Parameters:
   OpsWatchUrl:
