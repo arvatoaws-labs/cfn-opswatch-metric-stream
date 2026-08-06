@@ -285,6 +285,8 @@ Resources:
           - DatabaseMemoryUsageCountedForEvictPercentage
           - NetworkBandwidthInAllowanceExceeded
           - NetworkBandwidthOutAllowanceExceeded
+          - NetworkConntrackAllowanceExceeded
+          - NetworkPacketsPerSecondAllowanceExceeded
         - Namespace: AWS/Kafka
           MetricNames:
           - ActiveControllerCount
