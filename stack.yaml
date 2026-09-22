@@ -355,6 +355,7 @@ Resources:
         - Namespace: AWS/SNS
           MetricNames:
           - NumberOfNotificationsFailed
+          - SMSSuccessRate
         - Namespace: AWS/SQS
           MetricNames:
           - ApproximateAgeOfOldestMessage
