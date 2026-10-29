@@ -416,17 +416,6 @@
                                 ]
                             },
                             {
-                                "Namespace": "AWS/Lambda",
-                                "MetricNames": [
-                                    "ConcurrentExecutions",
-                                    "Duration",
-                                    "Errors",
-                                    "Invocations",
-                                    "Throttles",
-                                    "UnreservedConcurrentExecutions"
-                                ]
-                            },
-                            {
                                 "Namespace": "AWS/NATGateway",
                                 "MetricNames": [
                                     "ErrorPortAllocation",
