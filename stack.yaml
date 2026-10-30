@@ -297,14 +297,6 @@ Resources:
           - UnderMinIsrPartitionCount
           - UnderReplicatedPartitions
           - ZooKeeperSessionState
-        - Namespace: AWS/Lambda
-          MetricNames:
-          - ConcurrentExecutions
-          - Duration
-          - Errors
-          - Invocations
-          - Throttles
-          - UnreservedConcurrentExecutions
         - Namespace: AWS/NATGateway
           MetricNames:
           - ErrorPortAllocation
@@ -345,8 +337,10 @@ Resources:
           - ServerlessDatabaseCapacity
           - UpdateLatency
           - WriteLatency
-        - Namespace: AWS/Route53 # I think it is better to get all metrics here
-          # HealthCheckPercentageHealthy
+        - Namespace: AWS/Route53 # requested by customer https://arvato-systems-group.atlassian.net/browse/AWSOPS-1109
+          MetricNames:
+          - HealthCheckStatus
+          - HealthCheckPercentageHealthy
         - Namespace: AWS/TrustedAdvisor
         - Namespace: AWS/SES
           MetricNames:
@@ -367,17 +361,16 @@ Resources:
           - BytesDropCountNoRoute
           - PacketDropCountBlackhole
           - PacketDropCountNoRoute
-        - Namespace: AWS/WAF
-          MetricNames:
-          - AllowedRequests
-          - BlockedRequests
-        - Namespace: AWS/WAFV2
-          MetricNames:
-          - AllowedRequests
-          - BlockedRequests
-          - CountedRequests
-        - Namespace: Connect/Custom
-        - Namespace: AWS/Connect
+        # requested by customer https://arvato-systems-group.atlassian.net/browse/AWSOPS-1109
+        # - Namespace: AWS/WAF
+        #   MetricNames:
+        #   - AllowedRequests
+        #   - BlockedRequests
+        # - Namespace: AWS/WAFV2
+        #   MetricNames:
+        #   - AllowedRequests
+        #   - BlockedRequests
+        #   - CountedRequests
       - Ref: AWS::NoValue
 Parameters:
   OpsWatchUrl:
